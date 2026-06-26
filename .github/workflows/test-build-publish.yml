@@ -38,7 +38,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Set up Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -54,7 +54,7 @@ jobs:
           install-only: true
           version: v2.11.3
 
-      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: latest
 
@@ -86,7 +86,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Set Metadata
         id: set-metadata
@@ -125,7 +125,7 @@ jobs:
         shell: bash
 
       - name: image-build-publish
-        uses: hibare/.github/github/shared-workflows/docker-image-build-publish@754f2100fbd786eeee38c1261161b6e68a27f92a # v0.7.0
+        uses: hibare/.github/github/shared-workflows/docker-image-build-publish@ec61c90a75c7438d3fa683fffffd83908d1e7447 # v0.7.0
         with:
           image_names: ${{ steps.set-metadata.outputs.docker_image_names }}
           tags: ${{ steps.set-metadata.outputs.docker_tags }}
