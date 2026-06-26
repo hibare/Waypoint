@@ -36,7 +36,7 @@ repos:
       - id: go-test-mod
 
   - repo: https://github.com/sqlfluff/sqlfluff
-    rev: 4.2.1
+    rev: 4.2.2
     hooks:
       - id: sqlfluff-lint
         args: [--dialect, postgres, --exclude-rules, "RF06,RF04"]
