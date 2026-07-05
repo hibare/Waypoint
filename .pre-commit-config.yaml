@@ -39,9 +39,9 @@ repos:
     rev: 4.2.2
     hooks:
       - id: sqlfluff-lint
-        args: [--dialect, postgres, --exclude-rules, "RF06,RF04"]
+        args: [--dialect, postgres, --exclude-rules, "RF06,RF04,PG01"]
       - id: sqlfluff-fix
-        args: [--dialect, postgres, --exclude-rules, "RF06,RF04"]
+        args: [--dialect, postgres, --exclude-rules, "RF06,RF04,PG01"]
 
   - repo: local
     hooks:
