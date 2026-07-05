@@ -94,7 +94,6 @@ func (s *Server) Init() error {
 	}
 
 	s.router.Use(middleware.RequestID)
-	s.router.Use(middleware.RealIP)
 	s.router.Use(httplog.RequestLogger(httpLogger, httpOptions))
 	s.router.Use(middleware.Recoverer)
 	s.router.Use(middleware.Timeout(middlewareTimeout))
