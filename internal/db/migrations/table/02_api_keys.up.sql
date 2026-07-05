@@ -15,8 +15,8 @@ CREATE TABLE api_keys (
 );
 
 -- Index for efficient lookups
-CREATE INDEX idx_api_keys_user_id ON api_keys (user_id);
-CREATE INDEX idx_api_keys_key_hash ON api_keys (key_hash);
-CREATE INDEX idx_api_keys_expires_at ON api_keys (expires_at);
-CREATE INDEX idx_api_keys_revoked_at ON api_keys (revoked_at);
-CREATE INDEX idx_api_keys_state ON api_keys (state);
+CREATE INDEX CONCURRENTLY idx_api_keys_user_id ON api_keys (user_id);
+CREATE INDEX CONCURRENTLY idx_api_keys_key_hash ON api_keys (key_hash);
+CREATE INDEX CONCURRENTLY idx_api_keys_expires_at ON api_keys (expires_at);
+CREATE INDEX CONCURRENTLY idx_api_keys_revoked_at ON api_keys (revoked_at);
+CREATE INDEX CONCURRENTLY idx_api_keys_state ON api_keys (state);
