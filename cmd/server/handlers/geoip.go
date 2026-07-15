@@ -50,18 +50,18 @@ func (h *GeoIP) GetGeoIP(w http.ResponseWriter, r *http.Request) {
 func clientIP(r *http.Request) string {
 	// Cloudflare sends the real client IP in this header.
 	if ip := r.Header.Get("Cf-Connecting-Ip"); ip != "" {
-		if strings.Contains(ip, ",") {
-			ip = strings.TrimSpace(strings.Split(ip, ",")[0])
+		if i := strings.Index(ip, ","); i != -1 {
+			ip = ip[:i]
 		}
-		return ip
+		return strings.TrimSpace(ip)
 	}
 
 	// Standard reverse proxy header.
 	if ip := r.Header.Get("X-Forwarded-For"); ip != "" {
-		if strings.Contains(ip, ",") {
-			ip = strings.TrimSpace(strings.Split(ip, ",")[0])
+		if i := strings.Index(ip, ","); i != -1 {
+			ip = ip[:i]
 		}
-		return ip
+		return strings.TrimSpace(ip)
 	}
 
 	// Fall back to the TCP source address, stripping the port.

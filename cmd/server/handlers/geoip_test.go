@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 )
 
 func TestClientIP_CloudflareHeader(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil)
 	r.Header.Set("Cf-Connecting-Ip", "203.0.113.1")
 	r.RemoteAddr = "10.42.2.50:57056"
 
@@ -16,7 +17,7 @@ func TestClientIP_CloudflareHeader(t *testing.T) {
 }
 
 func TestClientIP_XForwardedFor(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil)
 	r.Header.Set("X-Forwarded-For", "198.51.100.2")
 	r.RemoteAddr = "10.42.2.50:57056"
 
@@ -24,7 +25,7 @@ func TestClientIP_XForwardedFor(t *testing.T) {
 }
 
 func TestClientIP_PrefersCloudflareOverXForwardedFor(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil)
 	r.Header.Set("Cf-Connecting-Ip", "203.0.113.1")
 	r.Header.Set("X-Forwarded-For", "198.51.100.2")
 	r.RemoteAddr = "10.42.2.50:57056"
@@ -33,21 +34,21 @@ func TestClientIP_PrefersCloudflareOverXForwardedFor(t *testing.T) {
 }
 
 func TestClientIP_FallsBackToRemoteAddr(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil)
 	r.RemoteAddr = "203.0.113.1:8080"
 
 	assert.Equal(t, "203.0.113.1", clientIP(r))
 }
 
 func TestClientIP_RemoteAddrNoPort(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil)
 	r.RemoteAddr = "203.0.113.1"
 
 	assert.Equal(t, "203.0.113.1", clientIP(r))
 }
 
 func TestClientIP_XForwardedForMultiple(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil)
 	r.Header.Set("X-Forwarded-For", "203.0.113.1, 198.51.100.2, 10.0.0.1")
 	r.RemoteAddr = "10.42.2.50:57056"
 
@@ -55,7 +56,7 @@ func TestClientIP_XForwardedForMultiple(t *testing.T) {
 }
 
 func TestClientIP_NoHeaders(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil)
 
-	assert.Equal(t, "", clientIP(r))
+	assert.Empty(t, clientIP(r))
 }
