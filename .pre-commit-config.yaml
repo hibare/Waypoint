@@ -16,7 +16,7 @@ repos:
       - id: check-shebang-scripts-are-executable
 
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.14.0
+    rev: v2.15.1
     hooks:
       - id: hadolint-docker
         name: Lint Dockerfiles
@@ -36,7 +36,7 @@ repos:
       - id: go-test-mod
 
   - repo: https://github.com/sqlfluff/sqlfluff
-    rev: 4.2.2
+    rev: 4.3.0
     hooks:
       - id: sqlfluff-lint
         args: [--dialect, postgres, --exclude-rules, "RF06,RF04,PG01"]
