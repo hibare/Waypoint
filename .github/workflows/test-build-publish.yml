@@ -125,7 +125,7 @@ jobs:
         shell: bash
 
       - name: image-build-publish
-        uses: hibare/.github/github/shared-workflows/docker-image-build-publish@f2ff32dea70db639092f5927623f59ed83099cec # v0.7.0
+        uses: hibare/.github/github/shared-workflows/docker-image-build-publish@f2ff32dea70db639092f5927623f59ed83099cec # v0.16.0
         with:
           image_names: ${{ steps.set-metadata.outputs.docker_image_names }}
           tags: ${{ steps.set-metadata.outputs.docker_tags }}
