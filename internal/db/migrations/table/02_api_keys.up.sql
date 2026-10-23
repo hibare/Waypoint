@@ -5,7 +5,7 @@ CREATE TABLE api_keys (
     user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     key_hash VARCHAR(255) UNIQUE NOT NULL,
-    scopes TEXT [] DEFAULT '{}',
+    scopes TEXT[] DEFAULT '{}',
     state VARCHAR(50) NOT NULL DEFAULT 'active',
     expires_at TIMESTAMPTZ,
     last_used_at TIMESTAMPTZ,
