@@ -159,7 +159,7 @@ func (s *Server) Init() error {
 			if r.URL.RawQuery != "" {
 				targetURL += "?" + r.URL.RawQuery
 			}
-			http.Redirect(w, r, targetURL, http.StatusTemporaryRedirect)
+			http.Redirect(w, r, targetURL, http.StatusTemporaryRedirect) //nolint:gosec // G710: safe dev-only redirect to fixed UI dev server
 		})
 	}
 
