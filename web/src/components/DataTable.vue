@@ -135,12 +135,17 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import {
-  useVueTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  useTable,
+  tableFeatures,
+  columnVisibilityFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
+  createPaginatedRowModel,
+  createSortedRowModel,
   type SortingState,
   type ColumnDef,
+  type Updater,
+  type PaginationState,
 } from "@tanstack/vue-table"
 import {
   ChevronDownIcon,
@@ -160,40 +165,42 @@ const props = defineProps<{
 }>()
 
 const sorting = ref<SortingState>([])
-const pagination = ref({
+const pagination = ref<PaginationState>({
   pageIndex: 0,
   pageSize: props.pageSize || 10,
 })
 
-const table = useVueTable({
-  get columns() {
-    return props.columns
-  },
-  get data() {
-    return props.data
-  },
-  getCoreRowModel: getCoreRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-  state: {
-    get sorting() {
-      return sorting.value
-    },
-    get pagination() {
-      return pagination.value
-    },
-  },
-  onSortingChange: (updater) => {
+const features = tableFeatures({
+  columnVisibilityFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+})
+
+const columns = computed(() => props.columns)
+const data = computed(() => props.data)
+const state = computed(() => ({
+  sorting: sorting.value,
+  pagination: pagination.value,
+}))
+
+const table = useTable({
+  features,
+  columns,
+  data,
+  state,
+  onSortingChange: (updater: Updater<SortingState>) => {
     sorting.value =
       typeof updater === "function" ? updater(sorting.value) : updater
   },
-  onPaginationChange: (updater) => {
+  onPaginationChange: (updater: Updater<PaginationState>) => {
     pagination.value =
       typeof updater === "function" ? updater(pagination.value) : updater
   },
 })
 
 const pageCount = computed(() => table.getPageCount())
-const pageIndex = computed(() => table.getState().pagination.pageIndex)
-const pageSize = computed(() => table.getState().pagination.pageSize)
+const pageIndex = computed(() => pagination.value.pageIndex)
+const pageSize = computed(() => pagination.value.pageSize)
 </script>
