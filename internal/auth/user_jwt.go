@@ -44,13 +44,11 @@ func CreateUserJWT(user *users.User, expiry time.Time) (string, error) {
 		UserEmail:  user.Email,
 		UserName:   strings.TrimSpace(user.FirstName + " " + user.LastName),
 		UserGroups: user.Groups,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expiry),
-			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-			NotBefore: jwt.NewNumericDate(time.Now().UTC()),
-			Issuer:    constants.ProgramIdentifier,
-			Subject:   user.ID.String(),
-		},
+		ExpiresAt:  jwt.NewNumericDate(expiry),
+		IssuedAt:   jwt.NewNumericDate(time.Now().UTC()),
+		NotBefore:  jwt.NewNumericDate(time.Now().UTC()),
+		Issuer:     constants.ProgramIdentifier,
+		Subject:    user.ID.String(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

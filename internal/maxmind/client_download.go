@@ -160,7 +160,7 @@ func (c *Client) parseSHA256File(path string) (string, string, error) {
 	sha256Sum := parts[0]
 	fileName := parts[1]
 
-	baseName := strings.Split(strings.Split(fileName, ".")[0], "_")[0]
+	baseName, _, _ := strings.Cut(strings.Split(fileName, ".")[0], "_")
 	dbFilename := fmt.Sprintf("%s.%s", baseName, DBSuffix)
 
 	return sha256Sum, dbFilename, nil
