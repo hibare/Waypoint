@@ -5,7 +5,7 @@ go 1.27.3
 require (
 	github.com/coreos/go-oidc/v3 v3.21.0
 	github.com/ggicci/httpin v0.20.5
-	github.com/go-chi/chi/v5 v5.4.0
+	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-chi/httplog/v3 v3.5.0
 	github.com/go-chi/render v1.0.3
 	github.com/golang-jwt/jwt/v5 v5.3.1
