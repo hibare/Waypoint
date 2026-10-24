@@ -1,41 +1,36 @@
 services:
   postgres:
-    image: postgres:18-alpine
-    container_name: postgres
-    hostname: postgres
+    image: docker.io/library/postgres:18.4-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
+    container_name: waypoint-postgres
+    hostname: waypoint-postgres
     environment:
       - POSTGRES_USER=john
       - POSTGRES_PASSWORD=pwd0123456789
       - POSTGRES_DB=waypoint
+      - PGDATA=/var/lib/postgresql/data
     network_mode: host
     volumes:
-      - ./.volumes/postgres:/var/lib/postgresql/data
+      - waypoint-postgres-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U john -d waypoint'"]
-      interval: 30s
-      timeout: 60s
-      retries: 5
+      interval: 5s
+      timeout: 5s
+      retries: 10
       start_period: 10s
 
   adminer:
-    image: adminer
-    container_name: adminer
-    hostname: adminer
+    image: docker.io/library/adminer:5.5.0@sha256:a1e730bf95a18f1d7c38b409ab58a39d57d07bdb090614b81f5c7b37c6021b96
+    container_name: waypoint-adminer
+    hostname: waypoint-adminer
     network_mode: host
-    healthcheck:
-      test: "curl -f localhost:8080 || false"
-      interval: 30s
-      timeout: 3s
-      retries: 10
-      start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy
 
   dex:
-    image: dexidp/dex:latest
-    container_name: dex
-    hostname: dex
+    image: docker.io/dexidp/dex:v2.45.1-alpine@sha256:8499afd690c437f52301efd2b05b2455da5bd2dfc20332cd697dc9937f808462
+    container_name: waypoint-dex
+    hostname: waypoint-dex
     network_mode: host
     volumes:
       - ./local/dex-config.yaml:/etc/dex/config.docker.yaml:ro
@@ -51,16 +46,17 @@ services:
     build:
       context: .
       dockerfile: ./local/Dockerfile.backend
-    container_name: migrate
-    hostname: migrate
+    container_name: waypoint-migrate
+    hostname: waypoint-migrate
+    network_mode: host
     working_dir: /app
-    user: ${HOST_UID}:${HOST_GID}
-    command: db migrate
+    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
+    entrypoint: ["go", "run", "main.go"]
+    command: ["db", "migrate"]
     env_file:
       - .env
     volumes:
       - ./:/app
-    network_mode: host
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,11 +66,11 @@ services:
     build:
       context: .
       dockerfile: ./local/Dockerfile.backend
-    container_name: api
-    hostname: api
+    container_name: waypoint-api
+    hostname: waypoint-api
     working_dir: /app
-    user: ${HOST_UID}:${HOST_GID}
-    command: -c air.toml
+    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
+    command: -c local/.air.toml
     env_file:
       - .env
     volumes:
@@ -91,19 +87,27 @@ services:
         condition: service_healthy
       dex:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   ui:
     build:
       context: ./web
       dockerfile: ../local/Dockerfile.ui
-    container_name: ui
-    hostname: ui
+    container_name: waypoint-ui
+    hostname: waypoint-ui
     working_dir: /app
-    network_mode: host
-    user: "${HOST_UID}:${HOST_GID}"
+    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
     volumes:
       - ./web:/app
       - ./certs:/certs
+    network_mode: host
+    environment:
+      - CI=true
+      - PNPM_CONFIG_FETCH_MIN_SPEED_KIBPS=0
     depends_on:
       api:
         condition: service_healthy
+
+volumes:
+  waypoint-postgres-data:

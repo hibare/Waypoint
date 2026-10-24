@@ -1,10 +1,20 @@
+# syntax=docker/dockerfile:1.7
+
 ARG GOLANG_VERSION=1.27.3
+ARG NODE_VERSION=26
+
 ARG VERSION=unknown
 ARG BUILD_TIMESTAMP=unknown
 ARG COMMIT_HASH=unknown
 
-# ================== Build Frontend ================== #
-FROM node:26-alpine AS frontend-build
+# =============================================================================
+# Frontend
+# =============================================================================
+
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-alpine AS frontend-build
+
+ARG TARGETOS
+ARG TARGETARCH
 
 ARG VERSION
 ARG BUILD_TIMESTAMP
@@ -12,73 +22,128 @@ ARG COMMIT_HASH
 
 WORKDIR /app
 
-COPY web/package.json web/pnpm-lock.yaml* ./
+ENV CI=true \
+    PNPM_CONFIG_FETCH_MIN_SPEED_KIBPS=0
 
-# hadolint ignore=DL3016
-RUN npm install -g pnpm \
-	&& pnpm install --frozen-lockfile
+# Copy dependency manifests first for maximum cache reuse.
+COPY web/package*.json \
+     web/pnpm-lock.yaml* \
+     ./
 
-COPY web/ ./
+# Install the exact pnpm version declared in package.json.
+RUN --mount=type=cache,target=/root/.npm \
+    PNPM_VERSION="$(node -p "require('./package.json').packageManager.split('@')[1].split('+')[0]")" \
+    && npm install -g "pnpm@${PNPM_VERSION}"
 
-ENV NODE_ENV=production
-ENV VITE_VERSION=$VERSION
-ENV VITE_BUILD_TIMESTAMP=$BUILD_TIMESTAMP
-ENV VITE_COMMIT_HASH=$COMMIT_HASH
+# Persist pnpm package store for repeated builds on the same builder.
+RUN --mount=type=cache,id=waypoint-pnpm-${TARGETARCH},target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --prod=false
 
-RUN pnpm run build
+COPY web/ .
 
-# ================== Build App ================== #
+ENV NODE_ENV=production \
+    VITE_VERSION=${VERSION} \
+    VITE_BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
+    VITE_COMMIT_HASH=${COMMIT_HASH}
 
-FROM golang:${GOLANG_VERSION}-alpine AS build
+RUN --mount=type=cache,id=waypoint-pnpm-${TARGETARCH},target=/root/.local/share/pnpm/store \
+    pnpm run build
+
+
+# =============================================================================
+# Backend
+# =============================================================================
+
+FROM --platform=$BUILDPLATFORM golang:${GOLANG_VERSION}-alpine AS backend-build
+
+ARG TARGETOS
+ARG TARGETARCH
 
 ARG VERSION
 ARG BUILD_TIMESTAMP
 ARG COMMIT_HASH
 
-ARG VERSION=unknown
-ARG BUILD_TIMESTAMP=unknown
-ARG COMMIT_HASH=unknown
+WORKDIR /src
 
-# prefer ash on Alpine so -o pipefail behaves as expected
-SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+ENV GOFLAGS=-mod=readonly
 
-# Install healthcheck cmd
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+
+# Build dependencies only.
 # hadolint ignore=DL3018
-RUN apk update \
-    && apk add --no-cache ca-certificates curl cosign \
-    && rm -rf /var/cache/apk/* \
-    && curl -sfL https://raw.githubusercontent.com/hibare/go-docker-healthcheck/main/install.sh | sh -s -- -d -v -b /usr/local/bin
+RUN apk add --no-cache \
+        ca-certificates \
+    && update-ca-certificates
 
-WORKDIR /src/
+# Keep Go dependency resolution independently cacheable.
+COPY go.mod go.sum ./
 
-COPY . /src/
+RUN --mount=type=cache,id=waypoint-go-mod-${TARGETARCH},target=/go/pkg/mod \
+    go mod download
 
-# Copy built frontend into backend source for embedding
+# Application source.
+COPY . .
+
+# Embed frontend into backend source.
 COPY --from=frontend-build /app/dist ./cmd/server/static
 
-# hadolint ignore=DL3018
-RUN CGO_ENABLED=0 go build -ldflags "-X github.com/hibare/Waypoint/internal/constants.Version=$VERSION -X github.com/hibare/Waypoint/internal/constants.BuildTimestamp=$BUILD_TIMESTAMP -X github.com/hibare/Waypoint/internal/constants.CommitHash=$COMMIT_HASH" -o /bin/waypoint ./main.go
+# Cross-compile on BUILDPLATFORM for TARGETOS/TARGETARCH.
+RUN --mount=type=cache,id=waypoint-go-mod-${TARGETARCH},target=/go/pkg/mod \
+    --mount=type=cache,id=waypoint-go-build-${TARGETARCH},target=/root/.cache/go-build \
+    CGO_ENABLED=0 \
+    GOOS="${TARGETOS}" \
+    GOARCH="${TARGETARCH}" \
+    go build \
+        -mod=readonly \
+        -trimpath \
+        -ldflags="-s -w \
+          -X github.com/hibare/Waypoint/internal/constants.Version=${VERSION} \
+          -X github.com/hibare/Waypoint/internal/constants.BuildTimestamp=${BUILD_TIMESTAMP} \
+          -X github.com/hibare/Waypoint/internal/constants.CommitHash=${COMMIT_HASH}" \
+        -o /bin/waypoint ./main.go
 
-# ================== Build Final Image ================== #
-# hadolint ignore=DL3006
+
+# =============================================================================
+# Runtime tools
+#
+# This stage runs on TARGETPLATFORM so architecture-specific binaries are
+# installed for the actual image architecture rather than BUILDPLATFORM.
+# =============================================================================
+
+FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS runtime-tools
+
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+
+# hadolint ignore=DL3018
+RUN apk add --no-cache \
+        ca-certificates \
+        curl \
+        cosign \
+    && update-ca-certificates \
+    && curl -sfL https://raw.githubusercontent.com/hibare/go-docker-healthcheck/main/install.sh | sh -s -- -d -v -b /usr/local/bin
+
+
+# =============================================================================
+# Runtime
+# =============================================================================
+
 FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
 
-# ensure consistent shell in final stage too
-SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+
+WORKDIR /app
 
 ENV WAYPOINT_SERVER_LISTEN_ADDR=0.0.0.0
 
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=runtime-tools /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=backend-build /bin/waypoint /bin/waypoint
+COPY --from=runtime-tools /usr/local/bin/healthcheck /bin/healthcheck
 
-COPY --from=build /bin/waypoint /bin/waypoint
-
-COPY --from=build /usr/local/bin/healthcheck /bin/healthcheck
+EXPOSE 5000
 
 HEALTHCHECK \
     --interval=30s \
     --timeout=3s \
     CMD ["healthcheck", "--url", "http://localhost:5000/ping"]
-
-EXPOSE 5000
 
 CMD ["/bin/waypoint", "serve"]

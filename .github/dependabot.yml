@@ -36,9 +36,11 @@ updates:
         patterns:
           - "*"
 
-  # Maintain version for Docker
+  # Maintain version for Docker (root and local staging images)
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "/"
+      - "/local"
     schedule:
       interval: "monthly"
       day: "friday"

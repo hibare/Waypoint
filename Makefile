@@ -4,7 +4,7 @@ MAKEFLAGS += -s
 
 UID:=$(shell id -u)
 GID:=$(shell id -g)
-COMPOSE_CMD := HOST_UID=$(UID) HOST_GID=$(GID) docker compose -f compose.dev.yml
+COMPOSE_CMD := HOST_UID=$(UID) HOST_GID=$(GID) docker compose -f local/compose.yaml --project-directory .
 VOLUMES_DIR := ./.volumes
 
 # Bold
@@ -21,6 +21,7 @@ init: ## Initialize development environment
 	mkdir -p $(VOLUMES_DIR)
 	@echo -e "$(BCYAN)Initializing development environment...$(NC)"
 	$(MAKE) gen-certs
+	go mod tidy
 	$(COMPOSE_CMD) build
 	pre-commit install
 
@@ -49,7 +50,8 @@ ui: backend ## Run UI with hot reload
 .PHONY: dev
 dev: ## Run full dev environment with hot reload
 	@echo -e "$(BCYAN)Running dev environment with hot reload...$(NC)"
-	$(COMPOSE_CMD) up
+	go mod tidy
+	$(COMPOSE_CMD) up --build
 
 .PHONY: clean
 clean: ## Clean up environment
@@ -58,4 +60,4 @@ clean: ## Clean up environment
 
 .PHONY: help
 help: ## Display this help
-		@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(BCYAN)%-18s$(NC)%s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(BCYAN)%-18s$(NC)%s\n", $$1, $$2}'

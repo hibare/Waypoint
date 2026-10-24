@@ -13,11 +13,12 @@ oauth2:
   skipApprovalScreen: true
 
 staticClients:
-  - id: axon
+  - id: waypoint
     redirectURIs:
       - "https://localhost:5000/api/v1/auth/callback"
-    name: "Axon"
-    secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+      - "http://localhost:5000/api/v1/auth/callback"
+    name: "Waypoint"
+    secret: waypoint-secret
 
 enablePasswordDB: true
 

@@ -1,6 +1,8 @@
-ARG GOLANG_VERSION=1.27
+ARG GOLANG_VERSION=1.27.3
 
 FROM golang:${GOLANG_VERSION}-alpine
+
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 # hadolint ignore=DL3018
 RUN apk add --no-cache curl

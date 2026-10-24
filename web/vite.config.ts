@@ -8,12 +8,12 @@ export default defineConfig({
   plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   server: (() => {
-    const keyPath = path.resolve(__dirname, "../certs/key.pem");
-    const certPath = path.resolve(__dirname, "../certs/cert.pem");
+    const keyPath = path.resolve(import.meta.dirname, "../certs/key.pem");
+    const certPath = path.resolve(import.meta.dirname, "../certs/cert.pem");
 
     if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
       return {

@@ -1,5 +1,59 @@
-.volumes
+# Development and IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git
 .git
-node_modules
-dist
+.gitignore
+.worktree
+
+# Docker volumes and data
+.volumes
+.data
+data/
+
+# Development tools
+.air
+air.toml
+.pre-commit-config.yaml
+.golangci.yml
+.editorconfig
+
+# Local development configs and certs
+.env
+.env.*
+config.yaml
+config.example.yaml
+local/
+compose*.yml
+certs/
+
+# Frontend build artifacts (recreated in container)
+**/node_modules
+**/.pnpm-store
+**/dist
+
+# Documentation and misc
+README.md
 *.md
+LICENSE
+Makefile
+docs/
+
+# Other
+.ignored
+
+# CI
+.github
+
+# Go
+**/vendor
+
+# AI
+**/.openai
+**/.opencode
+**/.claude
+**/.cursor
+**/.copilot
