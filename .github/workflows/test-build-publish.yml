@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@v2.22.1
+        uses: step-security/harden-runner@v2.22.2
         with:
           egress-policy: audit
 
@@ -46,7 +46,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Set up Python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9.3.0
@@ -69,7 +69,7 @@ jobs:
         run: cd web && pnpm install
 
       - name: Run pre-commit hooks
-        uses: hibare/.github/github/shared-workflows/pre-commit@v0.16.0
+        uses: hibare/.github/github/shared-workflows/pre-commit@v0.17.0
 
   docker-image-build-publish:
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
       packages: write # For GHCR
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@v2.22.1
+        uses: step-security/harden-runner@v2.22.2
         with:
           egress-policy: audit
 
@@ -125,7 +125,7 @@ jobs:
         shell: bash
 
       - name: image-build-publish
-        uses: hibare/.github/github/shared-workflows/docker-image-build-publish@v0.16.0
+        uses: hibare/.github/github/shared-workflows/docker-image-build-publish@v0.17.0
         with:
           image_names: ${{ steps.set-metadata.outputs.docker_image_names }}
           tags: ${{ steps.set-metadata.outputs.docker_tags }}
