@@ -1,23 +1,11 @@
+# Managed by Axon; manual edits will be overwritten.
 root = true
 
 [*]
+charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
-
-[*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,vue}]
-charset = utf-8
-indent_size = 2
-indent_style = space
-
-[Makefile]
-indent_style = tab
-
-[{package.json,*.yaml,*.yml}]
-indent_style = space
-indent_size = 2
-
-[*.toml]
 indent_style = space
 indent_size = 2
 
@@ -25,5 +13,27 @@ indent_size = 2
 indent_style = tab
 indent_size = 4
 
-[Dockerfile]
+[{Makefile,GNUmakefile,*.mk}]
 indent_style = tab
+
+[*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,vue}]
+indent_size = 2
+
+[*.{json,toml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[Dockerfile*]
+indent_size = 4
+
+[*.sql]
+indent_size = 4
+
+[.git*]
+trim_trailing_whitespace = false
