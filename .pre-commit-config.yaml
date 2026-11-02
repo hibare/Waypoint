@@ -14,6 +14,11 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
       - id: check-shebang-scripts-are-executable
+      - id: check-executables-have-shebangs
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: check-illegal-windows-names
+      - id: fix-byte-order-marker
 
   - repo: https://github.com/hadolint/hadolint
     rev: 2eece55955ced00200be9729e9728cb7dacca505 # v2.15.1
@@ -58,3 +63,19 @@ repos:
         language: system
         pass_filenames: false
         files: ^web/
+      - id: action-lock
+        name: Ensure GitHub Actions lock file is up to date
+        entry: bash -c 'gh actions-lock'
+        language: system
+        files: ^\.github/workflows/
+        pass_filenames: false
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: 341e2a331ba578029e66c2e01183e7a6b5ca9ab4 # v0.24.0
+    hooks:
+      - id: markdownlint-cli2-docker
