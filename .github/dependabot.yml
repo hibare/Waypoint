@@ -1,15 +1,17 @@
+# Managed by Axon; manual edits will be overwritten.
 version: 2
 updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
     cooldown:
-      default-days: 10
+      default-days: 5
     assignees:
       - "hibare"
     groups:
@@ -21,12 +23,13 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
     cooldown:
-      default-days: 10
+      default-days: 5
     assignees:
       - "hibare"
     allow:
@@ -36,18 +39,19 @@ updates:
         patterns:
           - "*"
 
-  # Maintain version for Docker (root and local staging images)
+  # Maintain version for Docker
   - package-ecosystem: "docker"
     directories:
       - "/"
       - "/local"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
     cooldown:
-      default-days: 10
+      default-days: 5
     assignees:
       - "hibare"
     groups:
@@ -55,16 +59,37 @@ updates:
         patterns:
           - "*"
 
-  # Maintain dependencies for npm (web frontend)
+  # Maintain dependencies for Docker Compose
+  - package-ecosystem: "docker-compose"
+    directories:
+      - "/"
+      - "/local"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "00:30"
+      timezone: "UTC"
+    target-branch: "main"
+    cooldown:
+      default-days: 5
+    assignees:
+      - "hibare"
+    groups:
+      docker-compose:
+        patterns:
+          - "*"
+
+  # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/web"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
     cooldown:
-      default-days: 10
+      default-days: 5
     assignees:
       - "hibare"
     groups:
@@ -76,12 +101,13 @@ updates:
   - package-ecosystem: "pre-commit"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
     cooldown:
-      default-days: 10
+      default-days: 5
     assignees:
       - "hibare"
     groups:
