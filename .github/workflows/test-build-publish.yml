@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@v2.22.2
+        uses: step-security/harden-runner@v2.23.0
         with:
           egress-policy: audit
 
@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@v7.0.0
+        uses: actions/setup-go@v7.1.0
         with:
           go-version-file: go.mod
 
@@ -54,7 +54,7 @@ jobs:
           install-only: true
           version: v2.15.0
 
-      - uses: pnpm/action-setup@v6.1.0
+      - uses: pnpm/action-setup@v6.1.1
         with:
           version: latest
 
@@ -69,7 +69,7 @@ jobs:
         run: cd web && pnpm install
 
       - name: Run pre-commit hooks
-        uses: hibare/.github/github/shared-workflows/pre-commit@v0.17.0
+        uses: hibare/.github/github/shared-workflows/pre-commit@v0.20.0
 
   docker-image-build-publish:
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
       packages: write # For GHCR
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@v2.22.2
+        uses: step-security/harden-runner@v2.23.0
         with:
           egress-policy: audit
 
@@ -125,7 +125,7 @@ jobs:
         shell: bash
 
       - name: image-build-publish
-        uses: hibare/.github/github/shared-workflows/docker-image-build-publish@v0.17.0
+        uses: hibare/.github/github/shared-workflows/docker-image-build-publish@v0.20.0
         with:
           image_names: ${{ steps.set-metadata.outputs.docker_image_names }}
           tags: ${{ steps.set-metadata.outputs.docker_tags }}
